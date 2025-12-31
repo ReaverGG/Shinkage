@@ -41,6 +41,7 @@ const RUN_THRESHOLD: float = 120.0
 @export_group("Essentials")
 @export var animator: AnimationPlayer
 @export var sprite: Sprite2D
+@export var sprite_node: Node2D
 @export var collider: CollisionShape2D
 
 func _ready() -> void:
@@ -75,11 +76,14 @@ func process_state(delta: float) -> void:
 func handle_movement(delta: float) -> void:
 	input_direction = Input.get_axis("left", "right")
 	if input_direction:
-		velocity.x = move_toward(velocity.x, input_direction * MOVE_SPEED, MOVE_ACCELERATION * delta)
+		if abs(velocity.x) < abs(MOVE_SPEED - 50):
+			velocity.x = move_toward(velocity.x, input_direction * MOVE_SPEED, MOVE_ACCELERATION * delta)
+		else:
+			velocity.x = MOVE_SPEED * input_direction
 	else:
 		velocity.x = move_toward(velocity.x, 0, MOVE_DECELERATION * delta)
 	flip_sprite()
 	
 func flip_sprite() -> void:
 	if input_direction:
-		sprite.flip_h = input_direction < 0
+		sprite_node.scale.x = input_direction
