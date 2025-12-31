@@ -395,6 +395,7 @@ sources/0 = SubResource("TileSetAtlasSource_ybhtm")
 [node name="Level1" type="Node2D" unique_id=1908878648]
 
 [node name="Player" parent="." unique_id=1909988626 instance=ExtResource("1_g34el")]
+floor_max_angle = 0.58294
 
 [node name="Camera" type="Camera2D" parent="." unique_id=508966979 node_paths=PackedStringArray("player")]
 process_callback = 0
