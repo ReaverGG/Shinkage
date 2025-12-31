@@ -30,9 +30,17 @@ var input_direction: float = 0.0
 const GRAVITY: float = 1500.0
 const FALL_SPEED: float = 640.0
 
+const MOVE_SPEED: float = 170.0
+const MOVE_ACCELERATION: float = 1700.0
+const MOVE_DECELERATION: float = 1100.0
+
+const WALK_THRESHOLD: float = 30.0
+const RUN_THRESHOLD: float = 120.0
+
 @export_category("References")
 @export_group("Essentials")
 @export var animator: AnimationPlayer
+@export var sprite: Sprite2D
 @export var collider: CollisionShape2D
 
 func _ready() -> void:
@@ -51,10 +59,27 @@ func switch_state(to_state: STATE) -> void:
 func process_state(delta: float) -> void:
 	match active_state:
 		STATE.FALL:
+			handle_movement(delta)
 			velocity.y = move_toward(velocity.y, FALL_SPEED, GRAVITY * delta)
 			if is_on_floor():
 				switch_state(STATE.FLOOR)
-
+		STATE.FLOOR:
+			handle_movement(delta)
+			if abs(velocity.x) < WALK_THRESHOLD:
+				animator.play("idle")
+			elif abs(velocity.x) < RUN_THRESHOLD:
+				animator.play("walk")
+			else:
+				animator.play("run")
+			
 func handle_movement(delta: float) -> void:
 	input_direction = Input.get_axis("left", "right")
+	if input_direction:
+		velocity.x = move_toward(velocity.x, input_direction * MOVE_SPEED, MOVE_ACCELERATION * delta)
+	else:
+		velocity.x = move_toward(velocity.x, 0, MOVE_DECELERATION * delta)
+	flip_sprite()
 	
+func flip_sprite() -> void:
+	if input_direction:
+		sprite.flip_h = input_direction < 0

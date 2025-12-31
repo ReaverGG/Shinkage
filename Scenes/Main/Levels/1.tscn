@@ -394,12 +394,14 @@ sources/0 = SubResource("TileSetAtlasSource_ybhtm")
 
 [node name="Level1" type="Node2D" unique_id=1908878648]
 
-[node name="Player" parent="." unique_id=1909988626 instance=ExtResource("1_g34el")]
+[node name="Player" parent="." unique_id=1909988626 node_paths=PackedStringArray("sprite") instance=ExtResource("1_g34el")]
+sprite = NodePath("Sprite")
 
 [node name="Sprite" parent="Player" index="1" unique_id=1472283884]
 frame = 85
 
 [node name="Camera" type="Camera2D" parent="." unique_id=508966979 node_paths=PackedStringArray("player")]
+process_callback = 0
 script = ExtResource("1_ahesr")
 player = NodePath("../Player")
 
