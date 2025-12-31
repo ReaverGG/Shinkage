@@ -25,6 +25,7 @@ var can_wall_jump: bool = false
 
 var active_state: STATE = STATE.FALL
 var previous_state: STATE = active_state
+var input_direction: float = 0.0
 
 const GRAVITY: float = 1500.0
 const FALL_SPEED: float = 640.0
@@ -50,4 +51,10 @@ func switch_state(to_state: STATE) -> void:
 func process_state(delta: float) -> void:
 	match active_state:
 		STATE.FALL:
-			pass
+			velocity.y = move_toward(velocity.y, FALL_SPEED, GRAVITY * delta)
+			if is_on_floor():
+				switch_state(STATE.FLOOR)
+
+func handle_movement(delta: float) -> void:
+	input_direction = Input.get_axis("left", "right")
+	

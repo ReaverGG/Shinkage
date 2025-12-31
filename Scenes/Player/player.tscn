@@ -1114,16 +1114,16 @@ script = ExtResource("1_uvnfx")
 animator = NodePath("Animator")
 collider = NodePath("Collider")
 
+[node name="Collider" type="CollisionShape2D" parent="." unique_id=416592722]
+position = Vector2(0, 2)
+shape = SubResource("CapsuleShape2D_uvnfx")
+
 [node name="Sprite" type="Sprite2D" parent="." unique_id=1472283884]
 position = Vector2(0, -16)
 texture = ExtResource("2_a3d8c")
 hframes = 14
 vframes = 13
 frame = 81
-
-[node name="Collider" type="CollisionShape2D" parent="." unique_id=416592722]
-position = Vector2(0, 2)
-shape = SubResource("CapsuleShape2D_uvnfx")
 
 [node name="Animator" type="AnimationPlayer" parent="." unique_id=372153919]
 libraries/ = SubResource("AnimationLibrary_xpcdj")
