@@ -13,8 +13,8 @@ enum STATE {
 	DASH,
 	WALL_SLIDE,
 	WALL_JUMP,
-	WALL_GRAB,
-	WALL_CLIMB,
+	LEDGE_GRAB,
+	LEDGE_CLIMB,
 }
 
 var can_dash: bool = false
@@ -30,7 +30,7 @@ var last_direction: float = 1.0
 
 const GRAVITY: float = 1500.0
 const FALL_SPEED: float = 640.0
-const JUMP_FORCE: float = 450.0
+const JUMP_FORCE: float = 460.0
 const JUMP_CUT_MULTIPLIER: float = 0.67
 const WALL_SLIDE_SPEED: float = 100.0
 const WALL_SLIDE_ACCEL: float = 100.0
@@ -49,13 +49,7 @@ const RUN_THRESHOLD: float = 120.0
 @export var sprite_node: Node2D
 @export var sprite: Sprite2D
 @export var collider: CollisionShape2D
-@export_group("RayCasts")
-@export var bottom_ray: RayCast2D
-@export var check_ray: RayCast2D
-@export var mid_ray: RayCast2D
-@export var top_ray: RayCast2D
-@export var over_top_ray: RayCast2D
-@export var climb_marker: Marker2D
+@export_group("Checkers")
 
 func _ready() -> void:
 	switch_state(active_state)
@@ -70,10 +64,6 @@ func switch_state(to_state: STATE) -> void:
 	match active_state:
 		STATE.FALL:
 			animator.play("jump_transition")
-		STATE.FLOOR:
-			if previous_state == STATE.WALL_CLIMB:
-				animator.play("idle")
-				global_position = climb_marker.global_position
 		STATE.JUMP:
 			animator.play("jump_start")
 			squash.play("squash")
@@ -81,23 +71,27 @@ func switch_state(to_state: STATE) -> void:
 		STATE.WALL_SLIDE:
 			velocity = Vector2.ZERO
 			animator.play("wall_contact")
-		STATE.WALL_GRAB:
+		STATE.LEDGE_GRAB:
 			velocity = Vector2.ZERO
 			animator.play("ledge_grab")
-		STATE.WALL_CLIMB:
+		STATE.LEDGE_CLIMB:
 			animator.play("ledge_climb")
 			
 func process_state(delta: float) -> void:
 	match active_state:
+		STATE.JUMP:
+			handle_movement(delta)
+			velocity.y = move_toward(velocity.y, 0, GRAVITY * delta)
+			if velocity.y >= 0:
+				switch_state(STATE.FALL)
+			if Input.is_action_just_released("jump"):
+				velocity.y *= JUMP_CUT_MULTIPLIER
+				switch_state(STATE.FALL)
 		STATE.FALL:
 			handle_movement(delta)
 			velocity.y = move_toward(velocity.y, FALL_SPEED, GRAVITY * delta)
 			if is_on_floor():
 				switch_state(STATE.FLOOR)
-			if !can_wall_climb() and can_wall_slide() and is_on_wall_only() and input_direction:
-				switch_state(STATE.WALL_SLIDE)
-			elif can_wall_climb() and !can_wall_slide():
-				switch_state(STATE.WALL_GRAB)
 		STATE.FLOOR:
 			handle_movement(delta)
 			if abs(velocity.x) < WALK_THRESHOLD:
@@ -109,29 +103,6 @@ func process_state(delta: float) -> void:
 			if Input.is_action_just_pressed("jump"):
 				switch_state(STATE.JUMP)
 			if !is_on_floor():
-				switch_state(STATE.FALL)
-		STATE.JUMP:
-			handle_movement(delta)
-			velocity.y = move_toward(velocity.y, 0, GRAVITY * delta)
-			if velocity.y >= 0:
-				switch_state(STATE.FALL)
-			if Input.is_action_just_released("jump"):
-				velocity.y *= JUMP_CUT_MULTIPLIER
-				switch_state(STATE.FALL)
-		STATE.WALL_GRAB:
-			if !is_on_wall_only():
-				velocity.x = last_direction * 300
-			if Input.is_action_just_pressed("jump"):
-				switch_state(STATE.WALL_CLIMB)
-		STATE.WALL_CLIMB:
-			if !animator.is_playing():
-				switch_state(STATE.FLOOR)
-		STATE.WALL_SLIDE:
-			handle_movement(delta)
-			velocity.y = move_toward(velocity.y, WALL_SLIDE_SPEED, WALL_SLIDE_ACCEL * delta)
-			if !is_on_wall_only() or !can_wall_slide():
-				if input_direction != last_direction:
-					sprite_node.scale.x *= -1
 				switch_state(STATE.FALL)
 				
 func handle_movement(delta: float) -> void:
@@ -150,10 +121,3 @@ func handle_movement(delta: float) -> void:
 func flip_sprite() -> void:
 	if input_direction:
 		sprite_node.scale.x = input_direction
-
-func can_wall_climb() -> bool:
-	return !bottom_ray.is_colliding() and mid_ray.is_colliding() and top_ray.is_colliding() and !check_ray.is_colliding()
-
-func can_wall_slide() -> bool:
-	return !bottom_ray.is_colliding() and mid_ray.is_colliding() and top_ray.is_colliding() and check_ray.is_colliding()\
-	and over_top_ray.is_colliding()
