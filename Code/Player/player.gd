@@ -29,7 +29,8 @@ var input_direction: float = 0.0
 
 const GRAVITY: float = 1500.0
 const FALL_SPEED: float = 640.0
-const JUMP_FORCE: float = 440.0
+const JUMP_FORCE: float = 450.0
+const JUMP_CUT_MULTIPLIER: float = 0.67
 
 const MOVE_SPEED: float = 170.0
 const MOVE_ACCELERATION: float = 1700.0
@@ -37,7 +38,6 @@ const MOVE_DECELERATION: float = 1100.0
 
 const WALK_THRESHOLD: float = 30.0
 const RUN_THRESHOLD: float = 120.0
-const JUMP_THRESHOLD: float = -350.0
 
 @export_category("References")
 @export_group("Essentials")
@@ -57,7 +57,7 @@ func switch_state(to_state: STATE) -> void:
 	active_state = to_state
 	match active_state:
 		STATE.FALL:
-			animator.play("jump_fall")
+			animator.play("jump_transition")
 		STATE.JUMP:
 			animator.play("jump_start")
 			velocity.y = -JUMP_FORCE
@@ -84,11 +84,12 @@ func process_state(delta: float) -> void:
 		STATE.JUMP:
 			handle_movement(delta)
 			velocity.y = move_toward(velocity.y, 0, GRAVITY * delta)
-			if velocity.y > JUMP_THRESHOLD:
-				animator.play("jump_transition")
-				if velocity.y >= 0:
-					switch_state(STATE.FALL)
-			
+			if velocity.y >= 0:
+				switch_state(STATE.FALL)
+			if Input.is_action_just_released("jump"):
+				velocity.y *= JUMP_CUT_MULTIPLIER
+				switch_state(STATE.FALL)
+				
 func handle_movement(delta: float) -> void:
 	input_direction = Input.get_axis("left", "right")
 	if input_direction:
