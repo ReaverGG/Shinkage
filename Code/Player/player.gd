@@ -117,7 +117,7 @@ func handle_movement(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, MOVE_DECELERATION * delta)
 	if input_direction:
 		last_direction = input_direction
-	
+
 func flip_sprite() -> void:
 	if input_direction:
 		sprite_node.scale.x = input_direction
