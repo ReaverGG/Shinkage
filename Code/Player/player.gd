@@ -42,9 +42,15 @@ const RUN_THRESHOLD: float = 120.0
 @export_category("References")
 @export_group("Essentials")
 @export var animator: AnimationPlayer
-@export var sprite: Sprite2D
+@export var squash: AnimationPlayer
 @export var sprite_node: Node2D
+@export var sprite: Sprite2D
 @export var collider: CollisionShape2D
+@export_group("RayCasts")
+@export var bottom_ray: RayCast2D
+@export var right_ray: RayCast2D
+@export var mid_ray: RayCast2D
+@export var top_ray: RayCast2D
 
 func _ready() -> void:
 	switch_state(active_state)
@@ -60,6 +66,7 @@ func switch_state(to_state: STATE) -> void:
 			animator.play("jump_transition")
 		STATE.JUMP:
 			animator.play("jump_start")
+			squash.play("squash")
 			velocity.y = -JUMP_FORCE
 
 func process_state(delta: float) -> void:
@@ -104,3 +111,6 @@ func handle_movement(delta: float) -> void:
 func flip_sprite() -> void:
 	if input_direction:
 		sprite_node.scale.x = input_direction
+
+#func can_wall_climb() -> bool:
+	#return !bottom_ray.is_colliding() and mid_ray.is_colliding() and top_ray.is_colliding() and !check_ray.is_colliding()

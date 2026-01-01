@@ -3,6 +3,44 @@
 [ext_resource type="Script" uid="uid://c4bhikjdgpaqj" path="res://Code/Player/player.gd" id="1_uvnfx"]
 [ext_resource type="Texture2D" uid="uid://bitl8ph5tqtfs" path="res://Assets/Samurai 2D Pixel Art v1.2/Samurai 2D Pixel Art v1.2/Sprite Sheet.png" id="2_a3d8c"]
 
+[sub_resource type="Animation" id="Animation_2ahak"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("SpriteNode/Sprite:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_xpcdj"]
+resource_name = "squash"
+length = 0.2
+step = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("SpriteNode/Sprite:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.099999994, 0.20000002),
+"transitions": PackedFloat32Array(0.46651262, 2.143531, 2.143531),
+"update": 0,
+"values": [Vector2(0.8, 1.2), Vector2(1.1, 0.9), Vector2(1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_mtuoh"]
+_data = {
+&"RESET": SubResource("Animation_2ahak"),
+&"squash": SubResource("Animation_xpcdj")
+}
+
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_uvnfx"]
 radius = 6.0
 height = 24.0
@@ -1109,25 +1147,57 @@ _data = {
 &"wall_slide": SubResource("Animation_qr1w5")
 }
 
-[node name="Player" type="CharacterBody2D" unique_id=1909988626 node_paths=PackedStringArray("animator", "sprite", "sprite_node", "collider")]
+[node name="Player" type="CharacterBody2D" unique_id=1909988626 node_paths=PackedStringArray("animator", "squash", "sprite_node", "sprite", "collider", "bottom_ray", "right_ray", "mid_ray", "top_ray")]
 script = ExtResource("1_uvnfx")
 animator = NodePath("Animator")
-sprite = NodePath("SpriteNode/Sprite")
+squash = NodePath("SpriteNode/Squash")
 sprite_node = NodePath("SpriteNode")
+sprite = NodePath("SpriteNode/Sprite")
 collider = NodePath("Collider")
-
-[node name="Collider" type="CollisionShape2D" parent="." unique_id=416592722]
-position = Vector2(0, 2)
-shape = SubResource("CapsuleShape2D_uvnfx")
+bottom_ray = NodePath("SpriteNode/RayCasts/BottomRay")
+right_ray = NodePath("SpriteNode/RayCasts/CheckRay")
+mid_ray = NodePath("SpriteNode/RayCasts/MidRay")
+top_ray = NodePath("SpriteNode/RayCasts/TopRay")
 
 [node name="SpriteNode" type="Node2D" parent="." unique_id=1293734633]
+
+[node name="ClimbMarker" type="Marker2D" parent="SpriteNode" unique_id=687554091]
+position = Vector2(13, -10)
+gizmo_extents = 35.5
+
+[node name="RayCasts" type="Node2D" parent="SpriteNode" unique_id=75351866]
+
+[node name="BottomRay" type="RayCast2D" parent="SpriteNode/RayCasts" unique_id=1200529658]
+position = Vector2(0, 14)
+target_position = Vector2(0, 14)
+
+[node name="CheckRay" type="RayCast2D" parent="SpriteNode/RayCasts" unique_id=410419144]
+position = Vector2(0, -33)
+target_position = Vector2(19, 22)
+
+[node name="MidRay" type="RayCast2D" parent="SpriteNode/RayCasts" unique_id=280988225]
+position = Vector2(5, 12)
+target_position = Vector2(14, 0)
+
+[node name="TopRay" type="RayCast2D" parent="SpriteNode/RayCasts" unique_id=2026775150]
+position = Vector2(2, -10)
+target_position = Vector2(17, 0)
 
 [node name="Sprite" type="Sprite2D" parent="SpriteNode" unique_id=1472283884]
 position = Vector2(0, -16)
 texture = ExtResource("2_a3d8c")
+offset = Vector2(14, -5)
 hframes = 14
 vframes = 13
-frame = 106
+frame = 33
+
+[node name="Squash" type="AnimationPlayer" parent="SpriteNode" unique_id=451236964]
+root_node = NodePath("../..")
+libraries/ = SubResource("AnimationLibrary_mtuoh")
+
+[node name="Collider" type="CollisionShape2D" parent="." unique_id=416592722]
+position = Vector2(0, 2)
+shape = SubResource("CapsuleShape2D_uvnfx")
 
 [node name="Animator" type="AnimationPlayer" parent="." unique_id=372153919]
 libraries/ = SubResource("AnimationLibrary_xpcdj")
