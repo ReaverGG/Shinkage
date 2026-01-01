@@ -433,6 +433,9 @@ floor_max_angle = 0.2617994
 [node name="Sprite" parent="Player/SpriteNode" parent_id_path=PackedInt32Array(1909988626, 1293734633) index="1" unique_id=1472283884]
 frame = 94
 
+[node name="BottomRay" parent="Player/SpriteNode/RayCasts" parent_id_path=PackedInt32Array(1909988626, 75351866) index="0" unique_id=1200529658]
+target_position = Vector2(0, 10)
+
 [node name="Animator" parent="Player" index="2" unique_id=372153919]
 next/jump_transition = &"jump_fall"
 

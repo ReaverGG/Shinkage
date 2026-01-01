@@ -32,8 +32,10 @@ const GRAVITY: float = 1500.0
 const FALL_SPEED: float = 640.0
 const JUMP_FORCE: float = 450.0
 const JUMP_CUT_MULTIPLIER: float = 0.67
+const WALL_SLIDE_SPEED: float = 100.0
+const WALL_SLIDE_ACCEL: float = 100.0
 
-const MOVE_SPEED: float = 170.0
+const MOVE_SPEED: float = 150.0
 const MOVE_ACCELERATION: float = 1700.0
 const MOVE_DECELERATION: float = 1100.0
 
@@ -92,9 +94,8 @@ func process_state(delta: float) -> void:
 			velocity.y = move_toward(velocity.y, FALL_SPEED, GRAVITY * delta)
 			if is_on_floor():
 				switch_state(STATE.FLOOR)
-			if !can_wall_climb() and can_wall_slide():
-				if is_on_wall_only():
-					switch_state(STATE.WALL_SLIDE)
+			if !can_wall_climb() and can_wall_slide() and is_on_wall_only() and input_direction:
+				switch_state(STATE.WALL_SLIDE)
 			elif can_wall_climb() and !can_wall_slide():
 				switch_state(STATE.WALL_GRAB)
 		STATE.FLOOR:
@@ -125,8 +126,16 @@ func process_state(delta: float) -> void:
 		STATE.WALL_CLIMB:
 			if !animator.is_playing():
 				switch_state(STATE.FLOOR)
+		STATE.WALL_SLIDE:
+			handle_movement(delta)
+			velocity.y = move_toward(velocity.y, WALL_SLIDE_SPEED, WALL_SLIDE_ACCEL * delta)
+			if !is_on_wall_only() or !can_wall_slide():
+				if input_direction != last_direction:
+					sprite_node.scale.x *= -1
+				switch_state(STATE.FALL)
 				
 func handle_movement(delta: float) -> void:
+	flip_sprite()
 	input_direction = Input.get_axis("left", "right")
 	if input_direction:
 		if abs(velocity.x) < abs(MOVE_SPEED - 50):
@@ -137,7 +146,6 @@ func handle_movement(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, MOVE_DECELERATION * delta)
 	if input_direction:
 		last_direction = input_direction
-	flip_sprite()
 	
 func flip_sprite() -> void:
 	if input_direction:
