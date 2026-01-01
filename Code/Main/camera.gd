@@ -14,7 +14,7 @@ var v_dir: int = 0
 
 func _physics_process(delta: float) -> void:
 	v_dir = sign(player.velocity.y)
-	
+	camera_y_follow_distance = abs(player.velocity.y) / 15
 	if !player.active_state == PlayerStates.WALL_CLIMB:
 		global_position = lerp(global_position, Vector2(player.global_position.x + camera_x_follow_distance * x_distance_multiplier\
 		* player.input_direction, player.global_position.y + camera_y_follow_distance * v_dir)\

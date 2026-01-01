@@ -439,7 +439,7 @@ next/jump_transition = &"jump_fall"
 [node name="Camera" type="Camera2D" parent="." unique_id=508966979 node_paths=PackedStringArray("player")]
 process_callback = 0
 position_smoothing_enabled = true
-drag_vertical_offset = -0.5
+drag_vertical_offset = -0.4
 script = ExtResource("1_ahesr")
 player = NodePath("../Player")
 
