@@ -30,9 +30,9 @@ tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.099999994, 0.20000002),
-"transitions": PackedFloat32Array(0.46651262, 2.143531, 2.143531),
+"transitions": PackedFloat32Array(0.4999957, 0.4999957, 1.9999841),
 "update": 0,
-"values": [Vector2(0.8, 1.2), Vector2(1.1, 0.9), Vector2(1, 1)]
+"values": [Vector2(0.7, 1.3), Vector2(1.15, 0.85), Vector2(1, 1)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_mtuoh"]
@@ -688,7 +688,7 @@ tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(14, -5)]
+"values": [Vector2(16, -5)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -729,7 +729,7 @@ tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(14, -5)]
+"values": [Vector2(16, -5)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -1018,7 +1018,7 @@ tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(7, 11)]
+"values": [Vector2(10, 10)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -1102,7 +1102,7 @@ tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(7, 10)]
+"values": [Vector2(10, 10)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -1147,7 +1147,7 @@ _data = {
 &"wall_slide": SubResource("Animation_qr1w5")
 }
 
-[node name="Player" type="CharacterBody2D" unique_id=1909988626 node_paths=PackedStringArray("animator", "squash", "sprite_node", "sprite", "collider", "bottom_ray", "right_ray", "mid_ray", "top_ray")]
+[node name="Player" type="CharacterBody2D" unique_id=1909988626 node_paths=PackedStringArray("animator", "squash", "sprite_node", "sprite", "collider", "bottom_ray", "check_ray", "mid_ray", "top_ray", "over_top_ray", "climb_marker")]
 script = ExtResource("1_uvnfx")
 animator = NodePath("Animator")
 squash = NodePath("SpriteNode/Squash")
@@ -1155,15 +1155,29 @@ sprite_node = NodePath("SpriteNode")
 sprite = NodePath("SpriteNode/Sprite")
 collider = NodePath("Collider")
 bottom_ray = NodePath("SpriteNode/RayCasts/BottomRay")
-right_ray = NodePath("SpriteNode/RayCasts/CheckRay")
+check_ray = NodePath("SpriteNode/RayCasts/CheckRay")
 mid_ray = NodePath("SpriteNode/RayCasts/MidRay")
 top_ray = NodePath("SpriteNode/RayCasts/TopRay")
+over_top_ray = NodePath("SpriteNode/RayCasts/OverTopRay")
+climb_marker = NodePath("SpriteNode/ClimbMarker")
 
 [node name="SpriteNode" type="Node2D" parent="." unique_id=1293734633]
 
 [node name="ClimbMarker" type="Marker2D" parent="SpriteNode" unique_id=687554091]
-position = Vector2(13, -10)
+position = Vector2(17, -28)
 gizmo_extents = 35.5
+
+[node name="Sprite" type="Sprite2D" parent="SpriteNode" unique_id=1472283884]
+position = Vector2(0, -16)
+texture = ExtResource("2_a3d8c")
+offset = Vector2(16, -5)
+hframes = 14
+vframes = 13
+frame = 28
+
+[node name="Squash" type="AnimationPlayer" parent="SpriteNode" unique_id=451236964]
+root_node = NodePath("../..")
+libraries/ = SubResource("AnimationLibrary_mtuoh")
 
 [node name="RayCasts" type="Node2D" parent="SpriteNode" unique_id=75351866]
 
@@ -1173,27 +1187,19 @@ target_position = Vector2(0, 14)
 
 [node name="CheckRay" type="RayCast2D" parent="SpriteNode/RayCasts" unique_id=410419144]
 position = Vector2(0, -33)
-target_position = Vector2(19, 22)
+target_position = Vector2(19, 17)
 
 [node name="MidRay" type="RayCast2D" parent="SpriteNode/RayCasts" unique_id=280988225]
 position = Vector2(5, 12)
 target_position = Vector2(14, 0)
 
 [node name="TopRay" type="RayCast2D" parent="SpriteNode/RayCasts" unique_id=2026775150]
-position = Vector2(2, -10)
+position = Vector2(4, -12)
+target_position = Vector2(15, 0)
+
+[node name="OverTopRay" type="RayCast2D" parent="SpriteNode/RayCasts" unique_id=253031476]
+position = Vector2(2, -29)
 target_position = Vector2(17, 0)
-
-[node name="Sprite" type="Sprite2D" parent="SpriteNode" unique_id=1472283884]
-position = Vector2(0, -16)
-texture = ExtResource("2_a3d8c")
-offset = Vector2(14, -5)
-hframes = 14
-vframes = 13
-frame = 33
-
-[node name="Squash" type="AnimationPlayer" parent="SpriteNode" unique_id=451236964]
-root_node = NodePath("../..")
-libraries/ = SubResource("AnimationLibrary_mtuoh")
 
 [node name="Collider" type="CollisionShape2D" parent="." unique_id=416592722]
 position = Vector2(0, 2)
