@@ -20,7 +20,8 @@ func _physics_process(delta: float) -> void:
 		* player.input_direction, player.global_position.y + camera_y_follow_distance * v_dir)\
 		, delta * camera_speed)
 	else:
-		global_position = lerp(global_position, player.climb_marker.global_position, delta * camera_speed)
+		global_position = lerp(global_position, Vector2(player.climb_marker.global_position.x, \
+		player.climb_marker.global_position.y - player.collider.shape.height / 2), delta * camera_speed * 1.5)
 	
 	if abs(player.velocity.x) < player.WALK_THRESHOLD: x_distance_multiplier = 0.0
 	else: x_distance_multiplier = 1.0

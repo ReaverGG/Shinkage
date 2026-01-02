@@ -27,6 +27,7 @@ var active_state: STATE = STATE.FALL
 var previous_state: STATE = active_state
 var input_direction: float = 0.0
 var last_direction: float = 1.0
+var ledge_hook_distance: float = 20.0
 
 const GRAVITY: float = 1500.0
 const FALL_SPEED: float = 640.0
@@ -34,6 +35,7 @@ const JUMP_FORCE: float = 460.0
 const JUMP_CUT_MULTIPLIER: float = 0.67
 const WALL_SLIDE_SPEED: float = 100.0
 const WALL_SLIDE_ACCEL: float = 100.0
+const LEDGE_SNAP_SPEED: float = 200.0
 
 const MOVE_SPEED: float = 150.0
 const MOVE_ACCELERATION: float = 1700.0
@@ -50,12 +52,22 @@ const RUN_THRESHOLD: float = 120.0
 @export var sprite: Sprite2D
 @export var collider: CollisionShape2D
 @export_group("Checkers")
+@export var floor_ray: RayCast2D
+@export var top_ray: RayCast2D
+@export var ledge_hook: CollisionShape2D
+@export var climb_marker: Marker2D
 
 func _ready() -> void:
 	switch_state(active_state)
 	
 func _physics_process(delta: float) -> void:
 	process_state(delta)
+	if !ledge_hook.position.x == last_direction * ledge_hook_distance:
+		ledge_hook.position.x = last_direction * ledge_hook_distance
+	# Ledge Hook
+	var is_falling: bool = (active_state == STATE.FALL)
+	var head_is_clear: bool = !top_ray.is_colliding()
+	ledge_hook.disabled = not (is_falling and head_is_clear)
 	move_and_slide()
 
 func switch_state(to_state: STATE) -> void:
@@ -64,6 +76,10 @@ func switch_state(to_state: STATE) -> void:
 	match active_state:
 		STATE.FALL:
 			animator.play("jump_transition")
+		STATE.FLOOR:
+			if previous_state == STATE.LEDGE_CLIMB:
+				global_position = Vector2(climb_marker.global_position.x, \
+				climb_marker.global_position.y - collider.shape.height / 2)
 		STATE.JUMP:
 			animator.play("jump_start")
 			squash.play("squash")
@@ -79,19 +95,14 @@ func switch_state(to_state: STATE) -> void:
 			
 func process_state(delta: float) -> void:
 	match active_state:
-		STATE.JUMP:
-			handle_movement(delta)
-			velocity.y = move_toward(velocity.y, 0, GRAVITY * delta)
-			if velocity.y >= 0:
-				switch_state(STATE.FALL)
-			if Input.is_action_just_released("jump"):
-				velocity.y *= JUMP_CUT_MULTIPLIER
-				switch_state(STATE.FALL)
 		STATE.FALL:
 			handle_movement(delta)
 			velocity.y = move_toward(velocity.y, FALL_SPEED, GRAVITY * delta)
 			if is_on_floor():
-				switch_state(STATE.FLOOR)
+				if floor_ray.is_colliding():
+					switch_state(STATE.FLOOR)
+				else:
+					switch_state(STATE.LEDGE_GRAB)
 		STATE.FLOOR:
 			handle_movement(delta)
 			if abs(velocity.x) < WALK_THRESHOLD:
@@ -104,10 +115,28 @@ func process_state(delta: float) -> void:
 				switch_state(STATE.JUMP)
 			if !is_on_floor():
 				switch_state(STATE.FALL)
-				
+		STATE.JUMP:
+			handle_movement(delta)
+			velocity.y = move_toward(velocity.y, 0, GRAVITY * delta)
+			if velocity.y >= 0:
+				switch_state(STATE.FALL)
+			if Input.is_action_just_released("jump"):
+				velocity.y *= JUMP_CUT_MULTIPLIER
+				switch_state(STATE.FALL)
+		STATE.WALL_SLIDE:
+			pass
+		STATE.LEDGE_GRAB:
+			if !is_on_wall():
+				position.x += last_direction * delta * LEDGE_SNAP_SPEED
+			if Input.is_action_just_pressed("jump"):
+				switch_state(STATE.LEDGE_CLIMB)
+		STATE.LEDGE_CLIMB:
+			if !animator.is_playing():
+				switch_state(STATE.FLOOR)
+
 func handle_movement(delta: float) -> void:
 	flip_sprite()
-	input_direction = Input.get_axis("left", "right")
+	input_direction = signf(Input.get_axis("left", "right"))
 	if input_direction:
 		if abs(velocity.x) < abs(MOVE_SPEED - 50):
 			velocity.x = move_toward(velocity.x, input_direction * MOVE_SPEED, MOVE_ACCELERATION * delta)

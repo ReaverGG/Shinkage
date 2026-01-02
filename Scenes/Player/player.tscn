@@ -1105,6 +1105,10 @@ _data = {
 &"wall_slide": SubResource("Animation_qr1w5")
 }
 
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_uvnfx"]
+radius = 6.0
+height = 24.0
+
 [sub_resource type="Animation" id="Animation_2ahak"]
 length = 0.001
 tracks/0/type = "value"
@@ -1122,8 +1126,8 @@ tracks/0/keys = {
 
 [sub_resource type="Animation" id="Animation_xpcdj"]
 resource_name = "squash"
-length = 0.2
-step = 0.1
+length = 0.3
+step = 0.05
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -1131,36 +1135,60 @@ tracks/0/path = NodePath("SpriteNode/Sprite:scale")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.099999994, 0.20000002),
+"times": PackedFloat32Array(0, 0.15, 0.3),
 "transitions": PackedFloat32Array(0.4999957, 0.4999957, 1.9999841),
 "update": 0,
 "values": [Vector2(0.7, 1.3), Vector2(1.15, 0.85), Vector2(1, 1)]
 }
 
+[sub_resource type="Animation" id="Animation_rukb4"]
+resource_name = "stretch"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("SpriteNode/Sprite:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(0.5358868, 0.5358868),
+"update": 0,
+"values": [Vector2(1.2, 1), Vector2(1, 1)]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_mtuoh"]
 _data = {
 &"RESET": SubResource("Animation_2ahak"),
-&"squash": SubResource("Animation_xpcdj")
+&"squash": SubResource("Animation_xpcdj"),
+&"stretch": SubResource("Animation_rukb4")
 }
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_uvnfx"]
-radius = 6.0
-height = 24.0
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_a3d8c"]
+size = Vector2(1, 0)
 
-[node name="Player" type="CharacterBody2D" unique_id=1909988626 node_paths=PackedStringArray("animator", "squash", "sprite_node", "sprite", "collider")]
+[node name="Player" type="CharacterBody2D" unique_id=1909988626 node_paths=PackedStringArray("animator", "squash", "sprite_node", "sprite", "collider", "floor_ray", "top_ray", "ledge_hook", "climb_marker")]
 script = ExtResource("1_uvnfx")
 animator = NodePath("Animator")
 squash = NodePath("SpriteNode/Squash")
 sprite_node = NodePath("SpriteNode")
 sprite = NodePath("SpriteNode/Sprite")
 collider = NodePath("Collider")
+floor_ray = NodePath("SpriteNode/Checkers/FloorRay")
+top_ray = NodePath("SpriteNode/Checkers/TopRay")
+ledge_hook = NodePath("LedgeHook")
+climb_marker = NodePath("SpriteNode/Checkers/ClimbMarker")
 
 [node name="Animator" type="AnimationPlayer" parent="." unique_id=372153919]
 libraries/ = SubResource("AnimationLibrary_xpcdj")
 autoplay = &"idle"
 next/wall_contact = &"wall_slide"
 
+[node name="Collider" type="CollisionShape2D" parent="." unique_id=416592722]
+shape = SubResource("CapsuleShape2D_uvnfx")
+
 [node name="SpriteNode" type="Node2D" parent="." unique_id=1293734633]
+position = Vector2(0, -2)
 
 [node name="Sprite" type="Sprite2D" parent="SpriteNode" unique_id=1472283884]
 position = Vector2(0, -16)
@@ -1168,12 +1196,25 @@ texture = ExtResource("2_a3d8c")
 offset = Vector2(16, -5)
 hframes = 14
 vframes = 13
-frame = 26
+frame = 33
 
 [node name="Squash" type="AnimationPlayer" parent="SpriteNode" unique_id=451236964]
 root_node = NodePath("../..")
 libraries/ = SubResource("AnimationLibrary_mtuoh")
 
-[node name="Collider" type="CollisionShape2D" parent="." unique_id=416592722]
-position = Vector2(0, 2)
-shape = SubResource("CapsuleShape2D_uvnfx")
+[node name="Checkers" type="Node2D" parent="SpriteNode" unique_id=1703755410]
+
+[node name="FloorRay" type="RayCast2D" parent="SpriteNode/Checkers" unique_id=275085766]
+position = Vector2(0, 14)
+target_position = Vector2(0, 8)
+
+[node name="TopRay" type="RayCast2D" parent="SpriteNode/Checkers" unique_id=1368412739]
+position = Vector2(0, -15)
+target_position = Vector2(22, 0)
+
+[node name="ClimbMarker" type="Marker2D" parent="SpriteNode/Checkers" unique_id=1612859002]
+position = Vector2(14, -14)
+
+[node name="LedgeHook" type="CollisionShape2D" parent="." unique_id=467893375]
+position = Vector2(20, -16)
+shape = SubResource("RectangleShape2D_a3d8c")
