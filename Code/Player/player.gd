@@ -27,12 +27,13 @@ var active_state: STATE = STATE.FALL
 var previous_state: STATE = active_state
 var input_direction: float = 0.0
 var last_direction: float = 1.0
+var x_velocity: float = 0.0
 var ledge_hook_distance: float = 20.0
 
 const GRAVITY: float = 1500.0
 const FALL_SPEED: float = 640.0
 const JUMP_FORCE: float = 460.0
-const JUMP_CUT_MULTIPLIER: float = 0.67
+const JUMP_CUT_MULTIPLIER: float = 0.567
 const WALL_SLIDE_SPEED: float = 100.0
 const WALL_SLIDE_ACCEL: float = 100.0
 const LEDGE_SNAP_SPEED: float = 200.0
@@ -41,7 +42,7 @@ const MOVE_SPEED: float = 150.0
 const MOVE_ACCELERATION: float = 1700.0
 const MOVE_DECELERATION: float = 1100.0
 
-const WALK_THRESHOLD: float = 30.0
+const WALK_THRESHOLD: float = 44.0
 const RUN_THRESHOLD: float = 120.0
 
 @export_category("References")
@@ -66,8 +67,11 @@ func _physics_process(delta: float) -> void:
 		ledge_hook.position.x = last_direction * ledge_hook_distance
 	# Ledge Hook
 	var is_falling: bool = (active_state == STATE.FALL)
-	var head_is_clear: bool = !top_ray.is_colliding()
-	ledge_hook.disabled = not (is_falling and head_is_clear)
+	var head_is_clear: bool = !top_ray.is_colliding() and !floor_ray.is_colliding()
+	if !Input.is_action_pressed("down"):
+		ledge_hook.disabled = not (is_falling and head_is_clear)
+	else:
+		ledge_hook.disabled = true
 	move_and_slide()
 
 func switch_state(to_state: STATE) -> void:
@@ -78,6 +82,7 @@ func switch_state(to_state: STATE) -> void:
 			animator.play("jump_transition")
 		STATE.FLOOR:
 			if previous_state == STATE.LEDGE_CLIMB:
+				animator.play("idle")
 				global_position = Vector2(climb_marker.global_position.x, \
 				climb_marker.global_position.y - collider.shape.height / 2)
 		STATE.JUMP:
@@ -127,26 +132,51 @@ func process_state(delta: float) -> void:
 			pass
 		STATE.LEDGE_GRAB:
 			if !is_on_wall():
-				position.x += last_direction * delta * LEDGE_SNAP_SPEED
+				global_position.x += last_direction * delta * LEDGE_SNAP_SPEED
+			
+			var current_input = signf(Input.get_axis("left", "right"))
+			
+			# Check if pressing AWAY from the wall
+			if current_input != 0 and current_input != last_direction:
+				# 1. Disable hook so we don't grab again this frame
+				ledge_hook.disabled = true
+				
+				# 2. Manual Push: Give immediate velocity to break wall contact
+				velocity.x = current_input * MOVE_SPEED
+				
+				# 3. Force Flip: Move the hook to the other side immediately
+				last_direction = current_input
+				
+				switch_state(STATE.FALL)
+				
 			if Input.is_action_just_pressed("jump"):
 				switch_state(STATE.LEDGE_CLIMB)
+			if Input.is_action_just_pressed("down"):
+				ledge_hook.disabled = true
+				switch_state(STATE.FALL)
+				
 		STATE.LEDGE_CLIMB:
 			if !animator.is_playing():
 				switch_state(STATE.FLOOR)
 
 func handle_movement(delta: float) -> void:
 	flip_sprite()
-	input_direction = signf(Input.get_axis("left", "right"))
-	if input_direction:
-		if abs(velocity.x) < abs(MOVE_SPEED - 50):
-			velocity.x = move_toward(velocity.x, input_direction * MOVE_SPEED, MOVE_ACCELERATION * delta)
+	var axis: float = Input.get_axis("left", "right")
+	if axis != 0:
+		if abs(axis * MOVE_SPEED) < RUN_THRESHOLD:
+			axis = signf(axis) * (WALK_THRESHOLD / MOVE_SPEED)
 		else:
-			velocity.x = MOVE_SPEED * input_direction
+			axis = signf(axis)
+	if axis != 0 and velocity.x != 0 and signf(axis) != signf(velocity.x):
+		velocity.x *= -1
+	input_direction = signf(axis)
+	x_velocity = axis
+	if axis != 0:
+		velocity.x = move_toward(velocity.x, axis * MOVE_SPEED, MOVE_ACCELERATION * delta)
+		last_direction = input_direction
 	else:
 		velocity.x = move_toward(velocity.x, 0, MOVE_DECELERATION * delta)
-	if input_direction:
-		last_direction = input_direction
-
+		
 func flip_sprite() -> void:
 	if input_direction:
 		sprite_node.scale.x = input_direction

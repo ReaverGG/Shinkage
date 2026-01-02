@@ -10,14 +10,16 @@ var camera_speed: float = 10.0
 var camera_x_follow_distance: float = 70.0
 var camera_y_follow_distance: float = 20.0
 var x_distance_multiplier: float = 0.0
+var zoom_level: float = 1
 var v_dir: int = 0
-
+	
 func _physics_process(delta: float) -> void:
+	zoom = Vector2(zoom_level, zoom_level)
 	v_dir = sign(player.velocity.y)
 	camera_y_follow_distance = abs(player.velocity.y) / 15
 	if !player.active_state == PlayerStates.WALL_CLIMB:
 		global_position = lerp(global_position, Vector2(player.global_position.x + camera_x_follow_distance * x_distance_multiplier\
-		* player.input_direction, player.global_position.y + camera_y_follow_distance * v_dir)\
+		* player.input_direction * abs(player.x_velocity), player.global_position.y + camera_y_follow_distance * v_dir)\
 		, delta * camera_speed)
 	else:
 		global_position = lerp(global_position, Vector2(player.climb_marker.global_position.x, \

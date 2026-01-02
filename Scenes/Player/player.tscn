@@ -1206,14 +1206,14 @@ libraries/ = SubResource("AnimationLibrary_mtuoh")
 
 [node name="FloorRay" type="RayCast2D" parent="SpriteNode/Checkers" unique_id=275085766]
 position = Vector2(0, 14)
-target_position = Vector2(0, 8)
+target_position = Vector2(0, 11)
 
 [node name="TopRay" type="RayCast2D" parent="SpriteNode/Checkers" unique_id=1368412739]
 position = Vector2(0, -15)
-target_position = Vector2(22, 0)
+target_position = Vector2(24, 0)
 
 [node name="ClimbMarker" type="Marker2D" parent="SpriteNode/Checkers" unique_id=1612859002]
-position = Vector2(14, -14)
+position = Vector2(15, -14)
 
 [node name="LedgeHook" type="CollisionShape2D" parent="." unique_id=467893375]
 position = Vector2(20, -16)
