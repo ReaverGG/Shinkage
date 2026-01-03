@@ -57,6 +57,9 @@ const RUN_THRESHOLD: float = 120.0
 @export var top_ray: RayCast2D
 @export var ledge_hook: CollisionShape2D
 @export var climb_marker: Marker2D
+@export_group("Timers")
+@export var coyote_timer: Timer
+@export var jump_buffer_timer: Timer
 
 func _ready() -> void:
 	switch_state(active_state)
@@ -108,6 +111,12 @@ func process_state(delta: float) -> void:
 					switch_state(STATE.FLOOR)
 				else:
 					switch_state(STATE.LEDGE_GRAB)
+			if !coyote_timer.is_stopped():
+				if Input.is_action_just_pressed("jump"):
+					coyote_timer.stop()
+					switch_state(STATE.JUMP)
+			if Input.is_action_just_pressed("jump"):
+				jump_buffer_timer.start()
 		STATE.FLOOR:
 			handle_movement(delta)
 			if abs(velocity.x) < WALK_THRESHOLD:
@@ -116,9 +125,12 @@ func process_state(delta: float) -> void:
 				animator.play("walk")
 			else:
 				animator.play("run")
-			if Input.is_action_just_pressed("jump"):
+			if Input.is_action_just_pressed("jump")\
+			or (Input.is_action_pressed("jump") and !jump_buffer_timer.is_stopped()):
+				jump_buffer_timer.stop()
 				switch_state(STATE.JUMP)
 			if !is_on_floor():
+				coyote_timer.start()
 				switch_state(STATE.FALL)
 		STATE.JUMP:
 			handle_movement(delta)
@@ -133,28 +145,17 @@ func process_state(delta: float) -> void:
 		STATE.LEDGE_GRAB:
 			if !is_on_wall():
 				global_position.x += last_direction * delta * LEDGE_SNAP_SPEED
-			
 			var current_input = signf(Input.get_axis("left", "right"))
-			
-			# Check if pressing AWAY from the wall
 			if current_input != 0 and current_input != last_direction:
-				# 1. Disable hook so we don't grab again this frame
 				ledge_hook.disabled = true
-				
-				# 2. Manual Push: Give immediate velocity to break wall contact
 				velocity.x = current_input * MOVE_SPEED
-				
-				# 3. Force Flip: Move the hook to the other side immediately
 				last_direction = current_input
-				
 				switch_state(STATE.FALL)
-				
 			if Input.is_action_just_pressed("jump"):
 				switch_state(STATE.LEDGE_CLIMB)
 			if Input.is_action_just_pressed("down"):
 				ledge_hook.disabled = true
 				switch_state(STATE.FALL)
-				
 		STATE.LEDGE_CLIMB:
 			if !animator.is_playing():
 				switch_state(STATE.FLOOR)

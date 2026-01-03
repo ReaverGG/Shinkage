@@ -1167,7 +1167,7 @@ _data = {
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_a3d8c"]
 size = Vector2(1, 0)
 
-[node name="Player" type="CharacterBody2D" unique_id=1909988626 node_paths=PackedStringArray("animator", "squash", "sprite_node", "sprite", "collider", "floor_ray", "top_ray", "ledge_hook", "climb_marker")]
+[node name="Player" type="CharacterBody2D" unique_id=1909988626 node_paths=PackedStringArray("animator", "squash", "sprite_node", "sprite", "collider", "floor_ray", "top_ray", "ledge_hook", "climb_marker", "coyote_timer", "jump_buffer_timer")]
 script = ExtResource("1_uvnfx")
 animator = NodePath("Animator")
 squash = NodePath("SpriteNode/Squash")
@@ -1178,6 +1178,8 @@ floor_ray = NodePath("SpriteNode/Checkers/FloorRay")
 top_ray = NodePath("SpriteNode/Checkers/TopRay")
 ledge_hook = NodePath("LedgeHook")
 climb_marker = NodePath("SpriteNode/Checkers/ClimbMarker")
+coyote_timer = NodePath("Timers/CoyoteTimer")
+jump_buffer_timer = NodePath("Timers/JumpBufferTimer")
 
 [node name="Animator" type="AnimationPlayer" parent="." unique_id=372153919]
 libraries/ = SubResource("AnimationLibrary_xpcdj")
@@ -1193,10 +1195,9 @@ position = Vector2(0, -2)
 [node name="Sprite" type="Sprite2D" parent="SpriteNode" unique_id=1472283884]
 position = Vector2(0, -16)
 texture = ExtResource("2_a3d8c")
-offset = Vector2(16, -5)
 hframes = 14
 vframes = 13
-frame = 33
+frame = 85
 
 [node name="Squash" type="AnimationPlayer" parent="SpriteNode" unique_id=451236964]
 root_node = NodePath("../..")
@@ -1214,7 +1215,18 @@ target_position = Vector2(24, 0)
 
 [node name="ClimbMarker" type="Marker2D" parent="SpriteNode/Checkers" unique_id=1612859002]
 position = Vector2(15, -14)
+gizmo_extents = 5.0
 
 [node name="LedgeHook" type="CollisionShape2D" parent="." unique_id=467893375]
 position = Vector2(20, -16)
 shape = SubResource("RectangleShape2D_a3d8c")
+
+[node name="Timers" type="Node" parent="." unique_id=1912981621]
+
+[node name="CoyoteTimer" type="Timer" parent="Timers" unique_id=327256203]
+wait_time = 0.15
+one_shot = true
+
+[node name="JumpBufferTimer" type="Timer" parent="Timers" unique_id=1157111613]
+wait_time = 0.3
+one_shot = true

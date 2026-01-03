@@ -6,7 +6,7 @@ enum PlayerStates {
 	WALL_CLIMB = 12,
 }
 
-var camera_speed: float = 10.0
+var camera_speed: float = 6.7
 var camera_x_follow_distance: float = 70.0
 var camera_y_follow_distance: float = 20.0
 var x_distance_multiplier: float = 0.0
