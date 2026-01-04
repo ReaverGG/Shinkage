@@ -1167,15 +1167,18 @@ _data = {
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_a3d8c"]
 size = Vector2(1, 0)
 
-[node name="Player" type="CharacterBody2D" unique_id=1909988626 node_paths=PackedStringArray("animator", "squash", "sprite_node", "sprite", "collider", "floor_ray", "top_ray", "ledge_hook", "climb_marker", "coyote_timer", "jump_buffer_timer")]
+[node name="Player" type="CharacterBody2D" unique_id=1909988626 node_paths=PackedStringArray("animator", "squash", "sprite_node", "sprite", "collider", "right_floor_ray", "left_floor_ray", "top_ray", "top_wall_slide_ray", "bottom_wall_slide_ray", "ledge_hook", "climb_marker", "coyote_timer", "jump_buffer_timer")]
 script = ExtResource("1_uvnfx")
 animator = NodePath("Animator")
 squash = NodePath("SpriteNode/Squash")
 sprite_node = NodePath("SpriteNode")
 sprite = NodePath("SpriteNode/Sprite")
 collider = NodePath("Collider")
-floor_ray = NodePath("SpriteNode/Checkers/FloorRay")
+right_floor_ray = NodePath("SpriteNode/Checkers/RightFloorRay")
+left_floor_ray = NodePath("SpriteNode/Checkers/LeftFloorRay")
 top_ray = NodePath("SpriteNode/Checkers/TopRay")
+top_wall_slide_ray = NodePath("SpriteNode/Checkers/TopWallSlideRay")
+bottom_wall_slide_ray = NodePath("SpriteNode/Checkers/BottomWallSlideRay")
 ledge_hook = NodePath("LedgeHook")
 climb_marker = NodePath("SpriteNode/Checkers/ClimbMarker")
 coyote_timer = NodePath("Timers/CoyoteTimer")
@@ -1195,9 +1198,11 @@ position = Vector2(0, -2)
 [node name="Sprite" type="Sprite2D" parent="SpriteNode" unique_id=1472283884]
 position = Vector2(0, -16)
 texture = ExtResource("2_a3d8c")
+offset = Vector2(10, 10)
+flip_h = true
 hframes = 14
 vframes = 13
-frame = 85
+frame = 175
 
 [node name="Squash" type="AnimationPlayer" parent="SpriteNode" unique_id=451236964]
 root_node = NodePath("../..")
@@ -1205,12 +1210,24 @@ libraries/ = SubResource("AnimationLibrary_mtuoh")
 
 [node name="Checkers" type="Node2D" parent="SpriteNode" unique_id=1703755410]
 
-[node name="FloorRay" type="RayCast2D" parent="SpriteNode/Checkers" unique_id=275085766]
-position = Vector2(0, 14)
+[node name="LeftFloorRay" type="RayCast2D" parent="SpriteNode/Checkers" unique_id=275085766]
+position = Vector2(-6, 14)
+target_position = Vector2(0, 11)
+
+[node name="RightFloorRay" type="RayCast2D" parent="SpriteNode/Checkers" unique_id=1393092108]
+position = Vector2(6, 14)
 target_position = Vector2(0, 11)
 
 [node name="TopRay" type="RayCast2D" parent="SpriteNode/Checkers" unique_id=1368412739]
 position = Vector2(0, -15)
+target_position = Vector2(24, 0)
+
+[node name="TopWallSlideRay" type="RayCast2D" parent="SpriteNode/Checkers" unique_id=68411488]
+position = Vector2(0, -25)
+target_position = Vector2(24, 0)
+
+[node name="BottomWallSlideRay" type="RayCast2D" parent="SpriteNode/Checkers" unique_id=385019875]
+position = Vector2(0, 16)
 target_position = Vector2(24, 0)
 
 [node name="ClimbMarker" type="Marker2D" parent="SpriteNode/Checkers" unique_id=1612859002]
