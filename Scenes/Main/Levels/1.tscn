@@ -436,7 +436,7 @@ player = NodePath("../Player")
 
 [node name="Player" parent="." unique_id=1909988626 instance=ExtResource("1_g34el")]
 z_index = 5
-position = Vector2(-242, -274)
+position = Vector2(-83, 51)
 floor_max_angle = 0.0
 
 [node name="Map" type="TileMapLayer" parent="." unique_id=918571660]

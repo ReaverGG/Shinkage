@@ -38,10 +38,12 @@ const GRAVITY: float = 1500.0
 const FALL_SPEED: float = 430.0
 const JUMP_FORCE: float = 460.0
 const JUMP_CUT_MULTIPLIER: float = 0.567
+
 const WALL_SLIDE_SPEED: float = 80.0
 const WALL_SLIDE_ACCEL: float = 100.0
-const WALL_JUMP_FORCE: Vector2 = Vector2(50, -90)
-const WALL_JUMP_LENGTH: float = 20.0
+const WALL_JUMP_FORCE: Vector2 = Vector2(170, -290)
+const WALL_JUMP_LENGTH: float = 18.0
+
 const LEDGE_SNAP_SPEED: float = 200.0
 
 const MOVE_SPEED: float = 150.0
@@ -75,18 +77,25 @@ func _ready() -> void:
 	
 func _physics_process(delta: float) -> void:
 	process_state(delta)
-	if ledge_hook.position.x != last_direction * ledge_hook_distance:
-		ledge_hook.position.x = last_direction * ledge_hook_distance
-		
+
 	# Ledge Hook
 	var is_falling: bool = (active_state == STATE.FALL)
+	
+	top_ray.force_raycast_update()
+	right_floor_ray.force_raycast_update()
+	left_floor_ray.force_raycast_update()
+	
 	var head_is_clear: bool = !top_ray.is_colliding() and (!right_floor_ray.is_colliding()\
 	and !left_floor_ray.is_colliding())
+	
 	if !Input.is_action_pressed("down"):
 		ledge_hook.disabled = not (is_falling and head_is_clear)
 	else:
 		ledge_hook.disabled = true
-	
+		
+	if ledge_hook.position.x != last_direction * ledge_hook_distance\
+	and active_state != STATE.LEDGE_GRAB:
+		ledge_hook.position.x = last_direction * ledge_hook_distance
 	move_and_slide()
 
 func switch_state(to_state: STATE) -> void:
@@ -116,6 +125,8 @@ func switch_state(to_state: STATE) -> void:
 			animator.play("ledge_climb")
 		STATE.WALL_JUMP:
 			animator.play("wall_jump")
+			sprite_node.scale.x *= -1
+
 func process_state(delta: float) -> void:
 	match active_state:
 		STATE.FALL:
@@ -194,9 +205,15 @@ func process_state(delta: float) -> void:
 				else:
 					switch_state(STATE.FLOOR)
 		STATE.WALL_JUMP:
-			if last_saved_x_position + WALL_JUMP_LENGTH * last_direction - global_position.x > 0:
-				velocity = WALL_JUMP_FORCE
-			
+			var distance_traveled = abs(global_position.x - last_saved_x_position)
+			if distance_traveled < WALL_JUMP_LENGTH:
+				velocity = Vector2(WALL_JUMP_FORCE.x * -last_direction, WALL_JUMP_FORCE.y)
+			else:
+				switch_state(STATE.FALL)
+			await get_tree().process_frame
+			if is_on_ceiling() or is_on_wall():
+				switch_state(STATE.FALL)
+				
 func handle_movement(delta: float) -> void:
 	flip_sprite()
 	var axis: float = Input.get_axis("left", "right")

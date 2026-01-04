@@ -8,7 +8,7 @@ var camera_y_follow_distance: float = 20.0
 var x_distance_multiplier: float = 0.0
 var zoom_level: float = 1
 var v_dir: int = 0
-var screen_margin_ratio: float = 1
+var screen_margin_ratio: float = 0.1
 
 func _ready() -> void:
 	position_smoothing_enabled = false
@@ -30,19 +30,26 @@ func _process(delta: float) -> void:
 	
 	var target_pos: Vector2
 	
-	if player.active_state != player.STATE.LEDGE_CLIMB:
-		target_pos = Vector2(
-			player.global_position.x + camera_x_follow_distance * x_distance_multiplier * player.input_direction * abs(player.x_velocity), 
-			player.global_position.y + camera_y_follow_distance * v_dir
-		)
-		var blend = 1.0 - exp(-camera_speed * delta)
-		global_position = global_position.lerp(target_pos, blend)
-	else:
+	if player.active_state == player.STATE.LEDGE_CLIMB:
 		target_pos = Vector2(
 			player.climb_marker.global_position.x, 
 			player.climb_marker.global_position.y - player.collider.shape.height / 2
 		)
 		var blend = 1.0 - exp(-camera_speed * 1.5 * delta)
+		global_position = global_position.lerp(target_pos, blend)
+		
+	elif player.active_state == player.STATE.WALL_JUMP:
+		target_pos = Vector2(
+			player.global_position.x + camera_x_follow_distance * x_distance_multiplier * player.last_direction\
+			 * abs(player.x_velocity), player.global_position.y + camera_y_follow_distance * v_dir
+		)
+	else:
+		target_pos = Vector2(
+			player.global_position.x + camera_x_follow_distance * x_distance_multiplier * player.input_direction\
+			* abs(player.x_velocity), 
+			player.global_position.y + camera_y_follow_distance * v_dir
+		)
+		var blend = 1.0 - exp(-camera_speed * delta)
 		global_position = global_position.lerp(target_pos, blend)
 
 	enforce_bounds()

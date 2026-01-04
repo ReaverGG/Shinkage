@@ -1018,7 +1018,7 @@ tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(0, -2)]
+"values": [Vector2(0, -6)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -1198,11 +1198,8 @@ position = Vector2(0, -2)
 [node name="Sprite" type="Sprite2D" parent="SpriteNode" unique_id=1472283884]
 position = Vector2(0, -16)
 texture = ExtResource("2_a3d8c")
-offset = Vector2(10, 10)
-flip_h = true
 hframes = 14
 vframes = 13
-frame = 175
 
 [node name="Squash" type="AnimationPlayer" parent="SpriteNode" unique_id=451236964]
 root_node = NodePath("../..")
@@ -1235,7 +1232,7 @@ position = Vector2(15, -14)
 gizmo_extents = 5.0
 
 [node name="LedgeHook" type="CollisionShape2D" parent="." unique_id=467893375]
-position = Vector2(20, -16)
+position = Vector2(19, -16)
 shape = SubResource("RectangleShape2D_a3d8c")
 
 [node name="Timers" type="Node" parent="." unique_id=1912981621]
